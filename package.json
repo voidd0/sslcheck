@@ -1,0 +1,53 @@
+{
+  "name": "@v0idd0/sslcheck",
+  "version": "1.0.0",
+  "description": "sslcheck — inspect TLS certificates for any host:port. Reports issuer, SANs, validity window, days-until-expiry, key strength, chain depth. Severity-aware exit codes for CI/cron monitors. Zero deps. Free forever from vøiddo.",
+  "main": "src/index.js",
+  "bin": {
+    "sslcheck": "./bin/sslcheck.js"
+  },
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "ssl",
+    "tls",
+    "certificate",
+    "cert-expiry",
+    "ssl-checker",
+    "tls-checker",
+    "monitoring",
+    "ci",
+    "devops",
+    "cli",
+    "devtools",
+    "voiddo"
+  ],
+  "author": "vøiddo <support@voiddo.com> (https://voiddo.com)",
+  "license": "MIT",
+  "homepage": "https://tools.voiddo.com/sslcheck/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voidd0/sslcheck.git"
+  },
+  "bugs": {
+    "url": "https://github.com/voidd0/sslcheck/issues",
+    "email": "support@voiddo.com"
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://voiddo.com/contact/"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=14"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ]
+}
