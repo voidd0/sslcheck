@@ -99,4 +99,6 @@ if (r.severity === 'critical') {
 
 MIT — part of the [vøiddo](https://voiddo.com) tools collection.
 
-Built by vøiddo, a small studio shipping AI-flavoured tools, browser extensions and weird browser games.
+---
+
+Built by [vøiddo](https://voiddo.com/) — a small studio shipping AI-flavoured products, free dev tools, Chrome extensions and weird browser games.
