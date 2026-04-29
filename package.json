@@ -1,6 +1,6 @@
 {
   "name": "@v0idd0/sslcheck",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "sslcheck — inspect TLS certificates for any host:port. Reports issuer, SANs, validity window, days-until-expiry, key strength, chain depth. Severity-aware exit codes for CI/cron monitors. Zero deps. Free forever from vøiddo.",
   "main": "src/index.js",
   "bin": {
@@ -45,9 +45,14 @@
     "node": ">=14"
   },
   "files": [
-    "bin",
-    "src",
-    "README.md",
-    "LICENSE"
+    "bin/",
+    "src/",
+    "LICENSE",
+    "README.md"
+  ],
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
   ]
 }
