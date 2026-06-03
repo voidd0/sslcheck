@@ -108,7 +108,7 @@ For a comprehensive cipher-suite + protocol weakness audit, `testssl.sh` is the 
 # Daily expiry watcher (cron)
 sslcheck \
   voiddo.com \
-  api.voiddo.com \
+  tells.voiddo.com \
   scrb.voiddo.com \
   --json | \
   jq -e '[.[]|select(.leaf.days_until_expiry < 14)]|length == 0' \
