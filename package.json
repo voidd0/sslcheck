@@ -1,7 +1,7 @@
 {
   "name": "@v0idd0/sslcheck",
-  "version": "1.0.1",
-  "description": "sslcheck — inspect TLS certificates for any host:port. Reports issuer, SANs, validity window, days-until-expiry, key strength, chain depth. Severity-aware exit codes for CI/cron monitors. Zero deps. Free forever from vøiddo.",
+  "version": "1.0.3",
+  "description": "Inspect the TLS certificate of any host and port: issuer, SANs, validity window, days until expiry, key strength and chain depth. Severity-based exit codes for CI and cron. No dependencies.",
   "main": "src/index.js",
   "bin": {
     "sslcheck": "./bin/sslcheck.js"
@@ -15,13 +15,13 @@
     "certificate",
     "cert-expiry",
     "ssl-checker",
-    "tls-checker",
+    "x509",
+    "openssl",
     "monitoring",
     "ci",
     "devops",
     "cli",
-    "devtools",
-    "voiddo"
+    "devtools"
   ],
   "author": "vøiddo <support@voiddo.com> (https://voiddo.com)",
   "license": "MIT",
@@ -45,14 +45,9 @@
     "node": ">=14"
   },
   "files": [
-    "bin/",
-    "src/",
-    "LICENSE",
-    "README.md"
-  ],
-  "os": [
-    "darwin",
-    "linux",
-    "win32"
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
   ]
 }

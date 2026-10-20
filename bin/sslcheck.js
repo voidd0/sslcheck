@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+if (process.argv[2] === '--version' || process.argv[2] === '-V') { console.log(require('../package.json').version); process.exit(0); }
 
 const { inspect } = require('../src/index');
 

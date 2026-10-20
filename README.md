@@ -5,7 +5,13 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-A0573A.svg)](LICENSE)
 [![Node ≥14](https://img.shields.io/badge/node-%E2%89%A514-1F1A14)](package.json)
 
-Inspect TLS certificates for any host:port. Reports issuer, SANs, validity window, days-until-expiry, key strength, chain depth. Zero deps. Free forever from vøiddo.
+**[Homepage](https://tools.voiddo.com/sslcheck/?ref=sslcheck-readme)** · **[Web compare](https://tools.voiddo.com/sslcheck/compare/openssl-s-client/?ref=sslcheck-readme)** · **[GitHub](https://github.com/voidd0/sslcheck)** · **[npm](https://www.npmjs.com/package/@v0idd0/sslcheck)** · **[All tools](https://tools.voiddo.com/?ref=sslcheck-catalog-readme)** · **[Contact](mailto:support@voiddo.com)**
+
+---
+
+Inspect TLS certificates for any host:port. Reports issuer, SANs, validity window, days-until-expiry, key strength, chain depth. Zero deps..
+
+If your muscle memory still says `openssl s_client -connect host:443 -servername host`, sslcheck gives you the same first look in a format humans and cron can actually use.
 
 ```
 $ sslcheck voiddo.com
@@ -23,6 +29,8 @@ voiddo.com:443  [ok]
 ## Why sslcheck
 
 You set up a Let's Encrypt cert eight months ago. Your auto-renew cron is supposed to handle it. Sometimes it doesn't, and the first sign is a customer pinging you about a browser warning. `openssl s_client -connect host:443 -servername host` does the same job, but the output is a wall of base64 that requires three more pipes to decode. sslcheck is the same probe formatted for human triage and shaped for cron exit codes.
+
+If you want a side-by-side readout before installing anything, see the comparison page at [tools.voiddo.com/sslcheck/compare/openssl-s-client/](https://tools.voiddo.com/sslcheck/compare/openssl-s-client/).
 
 ## Install
 
@@ -74,11 +82,11 @@ sslcheck slow-host.example.com --timeout 15000
 
 ## Severity rules
 
-- `critical` — expired, expires in ≤ 7 days, RSA key < 2048 bits, or chain not authorized
-- `warn` — expires in ≤ 30 days, or self-signed
-- `ok` — none of the above
+- `critical`: expired, expires in ≤ 7 days, RSA key < 2048 bits, or chain not authorized
+- `warn`: expires in ≤ 30 days, or self-signed
+- `ok`: none of the above
 
-Exit code is `1` on any `critical`, `0` otherwise — wire it directly into monitors/CI.
+Exit code is `1` on any `critical`, `0` otherwise, wire it directly into monitors/CI.
 
 ## Compared to alternatives
 
@@ -108,8 +116,8 @@ For a comprehensive cipher-suite + protocol weakness audit, `testssl.sh` is the 
 # Daily expiry watcher (cron)
 sslcheck \
   voiddo.com \
-  tells.voiddo.com \
-  scrb.voiddo.com \
+  api.voiddo.com \
+  example.org \
   --json | \
   jq -e '[.[]|select(.leaf.days_until_expiry < 14)]|length == 0' \
   || alert-ops "TLS cert nearing expiry"
@@ -122,21 +130,9 @@ const { inspect } = require('@v0idd0/sslcheck');
 
 const r = await inspect('voiddo.com', { timeout: 5000 });
 if (r.severity === 'critical') {
-  console.error(`${r.target} — ${r.reasons.join('; ')}`);
+  console.error(`${r.target}: ${r.reasons.join('; ')}`);
 }
 ```
-
-## More from the studio
-
-This is one tool out of many — see [`from-the-studio.md`](from-the-studio.md) for the full lineup of vøiddo products (other CLI tools, browser extensions, the studio's flagship products and games).
-
-## From the same studio
-
-- **[@v0idd0/jsonyo](https://www.npmjs.com/package/@v0idd0/jsonyo)** — JSON swiss army knife, 18 commands, zero limits
-- **[@v0idd0/envguard](https://www.npmjs.com/package/@v0idd0/envguard)** — stop shipping `.env` drift to staging
-- **[@v0idd0/depcheck](https://www.npmjs.com/package/@v0idd0/depcheck)** — find unused dependencies in one command
-- **[@v0idd0/gitstats](https://www.npmjs.com/package/@v0idd0/gitstats)** — git repo analytics, one command
-- **[View all tools →](https://voiddo.com/tools/)**
 
 ## License
 
@@ -144,4 +140,4 @@ MIT.
 
 ---
 
-Built by [vøiddo](https://voiddo.com/) — a small studio shipping AI-flavoured products, free dev tools, Chrome extensions and weird browser games.
+Maintained by v0idd0.
