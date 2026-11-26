@@ -4,7 +4,7 @@
   "description": "Inspect the TLS certificate of a host and port: issuer, SANs, validity, days until expiry, key size and chain length. Exit code 1 on a critical result, for cron and CI.",
   "main": "src/index.js",
   "bin": {
-    "sslcheck": "./bin/sslcheck.js"
+    "sslcheck": "bin/sslcheck.js"
   },
   "scripts": {
     "test": "node test.js"
