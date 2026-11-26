@@ -1,36 +1,10 @@
 # sslcheck
 
-[![npm version](https://img.shields.io/npm/v/@v0idd0/sslcheck.svg?color=A0573A)](https://www.npmjs.com/package/@v0idd0/sslcheck)
-[![npm downloads](https://img.shields.io/npm/dw/@v0idd0/sslcheck.svg?color=1F1A14)](https://www.npmjs.com/package/@v0idd0/sslcheck)
-[![License: MIT](https://img.shields.io/badge/license-MIT-A0573A.svg)](LICENSE)
-[![Node ≥14](https://img.shields.io/badge/node-%E2%89%A514-1F1A14)](package.json)
+Inspect the TLS certificate of a host and port: issuer, SANs, validity dates, days until expiry, key size and chain length. Use it by hand to triage a certificate warning, or in cron and CI, where the exit code tells you if something is critical.
 
-**[Homepage](https://tools.voiddo.com/sslcheck/?ref=sslcheck-readme)** · **[Web compare](https://tools.voiddo.com/sslcheck/compare/openssl-s-client/?ref=sslcheck-readme)** · **[GitHub](https://github.com/voidd0/sslcheck)** · **[npm](https://www.npmjs.com/package/@v0idd0/sslcheck)** · **[All tools](https://tools.voiddo.com/?ref=sslcheck-catalog-readme)** · **[Contact](mailto:support@voiddo.com)**
-
----
-
-Inspect TLS certificates for any host:port. Reports issuer, SANs, validity window, days-until-expiry, key strength, chain depth. Zero deps..
-
-If your muscle memory still says `openssl s_client -connect host:443 -servername host`, sslcheck gives you the same first look in a format humans and cron can actually use.
-
-```
-$ sslcheck voiddo.com
-voiddo.com:443  [ok]
-  cn       voiddo.com
-  sans     voiddo.com, www.voiddo.com
-  issuer   R12
-  valid    Mar 31 05:05:45 2026 GMT  →  Jun 29 05:05:44 2026 GMT
-  expires  62 days (lifetime 90 days)
-  key      RSA 2048 bits
-  conn     TLSv1.3  TLS_AES_256_GCM_SHA384 (TLSv1.3)  36ms
-  chain    3 cert(s)
-```
-
-## Why sslcheck
-
-You set up a Let's Encrypt cert eight months ago. Your auto-renew cron is supposed to handle it. Sometimes it doesn't, and the first sign is a customer pinging you about a browser warning. `openssl s_client -connect host:443 -servername host` does the same job, but the output is a wall of base64 that requires three more pipes to decode. sslcheck is the same probe formatted for human triage and shaped for cron exit codes.
-
-If you want a side-by-side readout before installing anything, see the comparison page at [tools.voiddo.com/sslcheck/compare/openssl-s-client/](https://tools.voiddo.com/sslcheck/compare/openssl-s-client/).
+[![npm](https://img.shields.io/npm/v/@v0idd0/sslcheck?color=00f6d0&labelColor=050914)](https://www.npmjs.com/package/@v0idd0/sslcheck)
+[![test](https://github.com/voidd0/sslcheck/actions/workflows/test.yml/badge.svg)](https://github.com/voidd0/sslcheck/actions/workflows/test.yml)
+[![license](https://img.shields.io/badge/license-MIT-00f6d0?labelColor=050914)](LICENSE)
 
 ## Install
 
@@ -38,106 +12,84 @@ If you want a side-by-side readout before installing anything, see the compariso
 npm install -g @v0idd0/sslcheck
 ```
 
+Or run it once without installing: `npx @v0idd0/sslcheck --help`. Needs Node.js 18 or newer. No dependencies.
+
+## Example
+
+Check two hosts in one call. Output from a real run on 2026-11-26:
+
+```console
+$ sslcheck example.com github.com
+example.com:443  [ok]
+  cn       example.com
+  sans     example.com, *.example.com
+  issuer   Cloudflare TLS Issuing ECC CA 3
+  valid    Nov 24 23:48:34 2026 GMT  →  Feb 22 23:53:08 2027 GMT
+  expires  88 days (lifetime 90 days)
+  key      prime256v1 256 bits
+  conn     TLSv1.3  TLS_AES_256_GCM_SHA384 (TLSv1.3)  45ms
+  chain    4 cert(s)
+
+github.com:443  [ok]
+  cn       github.com
+  sans     github.com, www.github.com
+  issuer   Sectigo Public Server Authentication CA DV E36
+  valid    Oct 30 00:00:00 2026 GMT  →  Jan 27 23:59:59 2027 GMT
+  expires  62 days (lifetime 90 days)
+  key      prime256v1 256 bits
+  conn     TLSv1.3  TLS_AES_128_GCM_SHA256 (TLSv1.3)  27ms
+  chain    4 cert(s)
+```
+
+A host that does not resolve gives one clear line and exit code 1, not a stack trace:
+
+```console
+$ sslcheck nonexistent.invalid
+nonexistent.invalid:443  [critical]  ENOTFOUND: getaddrinfo ENOTFOUND nonexistent.invalid
+  error: getaddrinfo ENOTFOUND nonexistent.invalid
+```
+
 ## Usage
 
-```bash
-# Single host (port defaults to 443)
-sslcheck voiddo.com
+```text
+sslcheck: inspect the TLS certificate of a host and port.
 
-# Multiple hosts
-sslcheck github.com npmjs.com cloudflare.com
+Usage:
+  sslcheck <host[:port]> [<host[:port]> ...] [options]
 
-# Custom port
-sslcheck mta.example.com:587
+Options:
+  --json              JSON output (single object for one target, array for many).
+  --servername <sni>  Override SNI (default: target host).
+  --timeout <ms>      Connect/handshake timeout in ms (default: 8000).
+  --pem               Include leaf certificate PEM in JSON output.
+  -h, --help          Show this help.
 
-# Override SNI (useful for self-signed / shared infra)
-sslcheck self-signed.badssl.com --servername example.com
+Exit codes:
+  0  no critical result (ok or warn), also with --json
+  1  any target critical (expired or expiring within 7 days, weak RSA key,
+     chain not authorized, no connection)
+  2  invalid arguments
 
-# JSON for CI / scripts
-sslcheck voiddo.com --json | jq '.leaf.days_until_expiry'
+Examples:
+  sslcheck example.com
+  sslcheck github.com:443 example.com
+  sslcheck expired.badssl.com
+  sslcheck example.com --json | jq '.leaf.days_until_expiry'
 
-# Dump leaf cert as PEM
-sslcheck voiddo.com --json --pem | jq -r '.pem' > leaf.pem
-
-# Custom timeout (ms, default 8000)
-sslcheck slow-host.example.com --timeout 15000
+Docs and issues: https://github.com/voidd0/sslcheck
 ```
 
-## What it reports
+## Limits
 
-| Field | Meaning |
-|---|---|
-| `severity` | `ok` / `warn` / `critical` (also drives exit code) |
-| `reasons` | Why severity isn't `ok` (e.g., `"expires in 14 days"`, `"self-signed"`) |
-| `leaf.common_name` | The CN on the leaf cert |
-| `leaf.sans` | All `subjectAltName` DNS entries |
-| `leaf.issuer_cn` | Who signed it |
-| `leaf.valid_from` / `valid_to` | Cert validity window |
-| `leaf.days_until_expiry` | Negative if expired |
-| `leaf.key_type` / `key_bits` | RSA 2048, ECDSA P-256, etc. |
-| `leaf.fingerprint_sha256` | For pinning / monitoring |
-| `protocol` / `cipher` | Negotiated TLS version + cipher suite |
-| `chain_length` | Number of certs in the served chain |
-| `authorized` | Did node's default trust store accept this chain? |
-
-## Severity rules
-
-- `critical`: expired, expires in ≤ 7 days, RSA key < 2048 bits, or chain not authorized
-- `warn`: expires in ≤ 30 days, or self-signed
-- `ok`: none of the above
-
-Exit code is `1` on any `critical`, `0` otherwise, wire it directly into monitors/CI.
-
-## Compared to alternatives
-
-| tool | exit code | JSON | per-cert key strength | offline | install |
-|---|---|---|---|---|---|
-| sslcheck | yes (severity-based) | yes | yes | needs network for handshake | one npm install |
-| `openssl s_client` | always 0 unless connection fails | no | manual | needs network | bundled |
-| `testssl.sh` | yes | yes (huge) | yes (deep) | needs network | bash + many deps |
-| SSL Labs (web) | n/a | yes (API) | yes | no | web only |
-| `openssl x509 -in cert.pem` | manual | no | manual | yes (file-only) | bundled |
-
-For a comprehensive cipher-suite + protocol weakness audit, `testssl.sh` is the deeper tool. For "is this cert about to expire?" run by cron every morning, sslcheck is the smaller hammer.
-
-## FAQ
-
-**Why default 8s timeout?** Because some hosts negotiate TLS slowly through carrier-grade NAT / corporate proxies, and 8s is enough for typical pathological cases without making CI feel hung.
-
-**Does it check OCSP?** No. OCSP stapling is increasingly skipped by browsers in favour of CRLite-style models, and our default checks (expiry / chain / key strength) cover the operationally relevant failure modes.
-
-**SANs longer than the terminal width?** They wrap. Use `--json` for programmatic parsing.
-
-**What does `authorized: false` mean?** Node's default trust store rejected the chain. Could be self-signed, could be unknown CA, could be missing intermediate. Pair with `--servername` if you suspect SNI mismatch.
-
-## CI / cron usage
-
-```bash
-# Daily expiry watcher (cron)
-sslcheck \
-  voiddo.com \
-  api.voiddo.com \
-  example.org \
-  --json | \
-  jq -e '[.[]|select(.leaf.days_until_expiry < 14)]|length == 0' \
-  || alert-ops "TLS cert nearing expiry"
-```
-
-## Programmatic API
-
-```javascript
-const { inspect } = require('@v0idd0/sslcheck');
-
-const r = await inspect('voiddo.com', { timeout: 5000 });
-if (r.severity === 'critical') {
-  console.error(`${r.target}: ${r.reasons.join('; ')}`);
-}
-```
+- The check connects with certificate verification turned off so it can still read broken certificates. Whether the chain is trusted is reported separately (`authorized` in the JSON output), using the CA list that ships with your Node.js.
+- A result is `critical` when the certificate has expired or expires within 7 days, the chain is not authorized, an RSA key is under 2048 bits, or the connection fails. It is `warn` at 30 days or less, or when the certificate is self-signed.
+- The tests that touch the network use example.com. If there is no connection they skip themselves. Set `SSLCHECK_SKIP_NETWORK=1` to skip them on purpose.
 
 ## License
 
-MIT.
+MIT, see [LICENSE](LICENSE).
 
 ---
 
-Maintained by v0idd0.
+Made by [vøiddo](https://voiddo.com/?src=gh). More command line tools: [voiddo.com/packages](https://voiddo.com/packages/?src=gh).
+We also run data scrapers for job boards, shops and ad libraries: [voiddo.com/scrapers](https://voiddo.com/scrapers/?src=gh).

@@ -1,8 +1,3 @@
-// sslcheck — inspect TLS certificates for any host:port. Reports issuer,
-// subject, SANs, validity window, days-until-expiry, key/sig strength,
-// and a simple chain depth count. Zero runtime dependencies — built on
-// node's tls module.
-
 'use strict';
 
 const tls = require('tls');

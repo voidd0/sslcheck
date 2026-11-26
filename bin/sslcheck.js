@@ -4,7 +4,7 @@ if (process.argv[2] === '--version' || process.argv[2] === '-V') { console.log(r
 
 const { inspect } = require('../src/index');
 
-const HELP = `sslcheck — inspect TLS certificates for any host:port.
+const HELP = `sslcheck: inspect the TLS certificate of a host and port.
 
 Usage:
   sslcheck <host[:port]> [<host[:port]> ...] [options]
@@ -17,16 +17,18 @@ Options:
   -h, --help          Show this help.
 
 Exit codes:
-  0  all certs ok (or --json output)
-  1  any cert critical (expired, weak key, chain not authorized)
+  0  no critical result (ok or warn), also with --json
+  1  any target critical (expired or expiring within 7 days, weak RSA key,
+     chain not authorized, no connection)
   2  invalid arguments
 
 Examples:
-  sslcheck voiddo.com
-  sslcheck github.com:443 npmjs.com cloudflare.com
+  sslcheck example.com
+  sslcheck github.com:443 example.com
   sslcheck expired.badssl.com
-  sslcheck self-signed.badssl.com --servername example.com
-  sslcheck voiddo.com --json | jq '.leaf.days_until_expiry'
+  sslcheck example.com --json | jq '.leaf.days_until_expiry'
+
+Docs and issues: https://github.com/voidd0/sslcheck
 `;
 
 function parseArgs(argv) {
@@ -45,7 +47,7 @@ function parseArgs(argv) {
   return { targets, opts };
 }
 
-const isTTY = process.stdout.isTTY;
+const isTTY = process.stdout.isTTY && !process.env.NO_COLOR;
 const C = {
   reset: isTTY ? '\x1b[0m' : '',
   dim:   isTTY ? '\x1b[2m' : '',
